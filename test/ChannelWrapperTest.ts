@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import * as amqplib from 'amqplib';
@@ -585,7 +586,6 @@ describe('ChannelWrapper', function () {
             channelWrapper.checkExchange('fish');
             expect(channel.checkExchange).to.have.beenCalledTimes(1);
             expect(channel.checkExchange).to.have.beenCalledWith('fish');
-            
         });
     });
 
@@ -607,7 +607,7 @@ describe('ChannelWrapper', function () {
             channelWrapper.bindQueue('dog', 'bone', 'legs');
             expect(channel.bindQueue).to.have.beenCalledTimes(1);
             expect(channel.bindQueue).to.have.beenCalledWith('dog', 'bone', 'legs', undefined);
-            
+
             channelWrapper.unbindQueue('dog', 'bone', 'legs');
             expect(channel.unbindQueue).to.have.beenCalledTimes(1);
             expect(channel.unbindQueue).to.have.beenCalledWith('dog', 'bone', 'legs', undefined);

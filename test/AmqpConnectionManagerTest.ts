@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import origAmqp from 'amqplib';
 import chai from 'chai';
 import chaiString from 'chai-string';

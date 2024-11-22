@@ -65,6 +65,13 @@ export interface AmqpConnectionManagerOptions {
         | (() => Promise<ConnectionUrl | ConnectionUrl[]>)
         | undefined;
 
+    /**
+     * If `true`, then when the connection is re-established, the list of servers will be refreshed.
+     * Default is `false`.
+     * Note: only useful when `findServers` is supplied.
+     */
+    refreshServersOnReconnect?: boolean;
+
     /** Connection options, passed as options to the amqplib.connect() method. */
     connectionOptions?: AmqpConnectionOptions;
 }
@@ -91,7 +98,7 @@ export interface IAmqpConnectionManager {
     addListener(event: 'unblocked', listener: () => void): this;
     addListener(event: 'disconnect', listener: (arg: { err: Error }) => void): this;
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     listeners(eventName: string | symbol): Function[];
 
     on(event: string, listener: (...args: any[]) => void): this;
@@ -152,6 +159,7 @@ export default class AmqpConnectionManager extends EventEmitter implements IAmqp
     private _cancelRetriesHandler?: () => void;
     private _connectPromise?: Promise<null>;
     private _currentConnection?: amqp.Connection;
+    private _refreshServersOnReconnect: boolean;
     private _findServers:
         | ((callback: (urls: ConnectionUrl | ConnectionUrl[]) => void) => void)
         | (() => Promise<ConnectionUrl | ConnectionUrl[]>);
@@ -207,6 +215,7 @@ export default class AmqpConnectionManager extends EventEmitter implements IAmqp
         // There will be one listener per channel, and there could be a lot of channels, so disable warnings from node.
         this.setMaxListeners(0);
 
+        this._refreshServersOnReconnect = !!options.refreshServersOnReconnect;
         this._findServers = options.findServers || (() => Promise.resolve(urls));
     }
 
@@ -344,7 +353,11 @@ export default class AmqpConnectionManager extends EventEmitter implements IAmqp
 
         const result = (this._connectPromise = Promise.resolve()
             .then(() => {
-                if (!this._urls || this._currentUrl >= this._urls.length) {
+                if (
+                    this._refreshServersOnReconnect ||
+                    !this._urls ||
+                    this._currentUrl >= this._urls.length
+                ) {
                     this._currentUrl = 0;
                     return pb.call(this._findServers, 0, null);
                 } else {

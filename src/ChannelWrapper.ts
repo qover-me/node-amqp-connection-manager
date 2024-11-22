@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import type * as amqplib from 'amqplib';
 import { Options } from 'amqplib';
 import * as crypto from 'crypto';
